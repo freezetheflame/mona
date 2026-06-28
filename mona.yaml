@@ -1,0 +1,41 @@
+# Mona 配置示例
+# 复制此文件为 mona.yaml 并修改
+
+triggers:
+  # 🔴 紧急事件 — 立即唤醒 Agent
+  urgent:
+    - pattern: "ERROR|FATAL|CRASH|Exception|Traceback|segfault"
+      action: pulse
+    - pattern: "BUILD FAILED|TEST FAILED|FAILED"
+      action: pulse
+    - pattern: "Cannot find module|ModuleNotFoundError|ImportError"
+      action: pulse
+
+  # 🟢 里程碑事件 — 关键节点通知
+  milestone:
+    - pattern: "BUILD SUCCESS|SUCCESS|All tests passed"
+      action: pulse
+    - pattern: "100%|completed|finished"
+      action: pulse
+      interval: 60
+
+  # 🔵 进度事件 — 定期汇报进度
+  progress:
+    - pattern: "^(\\d+)/(\\d+)"
+      action: pulse
+      interval: 30
+    - pattern: "(\\d+)%"
+      action: pulse
+      interval: 60
+
+output:
+  # 可选: pulse | buffer | batch | stdout
+  mode: pulse
+  pulse_dir: ~/.mona/pulses/
+  buffer_file: /tmp/mona-output.txt
+  batch_interval: 60
+
+summarizer:
+  deduplicate: true        # 折叠重复行
+  fold_progress_bars: true # 折叠进度条
+  max_context_lines: 10    # 触发时附带的上下文行数
